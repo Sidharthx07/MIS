@@ -1,0 +1,3138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" id="metaTheme" content="#0e0b0a">
+<script>
+(function(){
+    try {
+        var t = localStorage.getItem("mis_theme");
+        if (t !== "light" && t !== "dark") t = "dark";
+        document.documentElement.setAttribute("data-theme", t);
+    } catch(e) { document.documentElement.setAttribute("data-theme", "dark"); }
+})();
+</script>
+
+<title>MARKET INTELLIGENCE SYSTEM - Stock Market Analyzer</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&display=swap');
+
+:root {
+    --bg: #0e0b0a;
+    --panel: #17120f;
+    --panel2: #211a15;
+    --inset: #110d0b;
+    --inset2: #1d1612;
+    --border: rgba(255,226,200,.10);
+    --text: #fbf4ec;
+    --muted: #b3a597;
+    --green: #4be38a;
+    --red: #ff5a63;
+    --yellow: #ffc233;
+    --ember: #ff7a1a;
+    --amber: #ffb02e;
+    --rose: #ff4d8d;
+    /* legacy names kept so nothing else breaks */
+    --blue: #ff7a1a;
+    --cyan: #ffb02e;
+    --shadow: 0 18px 50px rgba(0,0,0,.38);
+    --radius: 18px;
+    --display: "Space Grotesk", Inter, ui-sans-serif, system-ui, sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+}
+
+body {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+                 "Segoe UI", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow-x: hidden;
+    position: relative;
+}
+
+/* ---------- living background ---------- */
+
+body::before {
+    content: "";
+    position: fixed;
+    inset: -20%;
+    z-index: 0;
+    pointer-events: none;
+    background:
+        radial-gradient(circle at 18% 12%, rgba(255,122,26,.20), transparent 32%),
+        radial-gradient(circle at 85% 18%, rgba(255,77,141,.15), transparent 30%),
+        radial-gradient(circle at 60% 90%, rgba(75,227,138,.10), transparent 34%);
+    animation: drift 22s ease-in-out infinite alternate;
+}
+
+body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background-image:
+        linear-gradient(rgba(255,226,200,.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,226,200,.035) 1px, transparent 1px);
+    background-size: 44px 44px;
+    -webkit-mask-image: radial-gradient(ellipse at 50% 0%, #000 0%, transparent 70%);
+            mask-image: radial-gradient(ellipse at 50% 0%, #000 0%, transparent 70%);
+}
+
+@keyframes drift {
+    0%   { transform: translate3d(0,0,0) scale(1); }
+    50%  { transform: translate3d(3%,2%,0) scale(1.06); }
+    100% { transform: translate3d(-3%,4%,0) scale(1.02); }
+}
+
+@keyframes rise {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes sheen {
+    0%   { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+}
+
+@keyframes sweep {
+    from { transform: translateX(-120%); }
+    to   { transform: translateX(320%); }
+}
+
+@keyframes pulse {
+    0%   { box-shadow: 0 0 0 0 rgba(255,122,26,.55); }
+    100% { box-shadow: 0 0 0 14px rgba(255,122,26,0); }
+}
+
+button,
+input,
+select,
+textarea {
+    font: inherit;
+}
+
+button {
+    cursor: pointer;
+}
+
+.app {
+    width: min(1450px, 94%);
+    margin: auto;
+    position: relative;
+    z-index: 1;
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+}
+
+/* ================= HEADER ================= */
+
+header {
+    padding: calc(25px + env(safe-area-inset-top)) 0 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    animation: rise .6s both;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+}
+
+.logo {
+    width: 48px;
+    height: 48px;
+    border-radius: 15px;
+    display: grid;
+    place-items: center;
+    background: linear-gradient(135deg, var(--ember), var(--amber), var(--rose), var(--ember));
+    background-size: 250% 250%;
+    animation: sheen 6s linear infinite, pulse 2.6s ease-out infinite;
+    color: #1a0b00;
+    font-size: 23px;
+    font-weight: 900;
+    flex-shrink: 0;
+    box-shadow: 0 10px 30px rgba(255,122,26,.35);
+}
+
+.brand h1 {
+    font-family: var(--display);
+    font-size: 22px;
+    letter-spacing: -.5px;
+    background: linear-gradient(90deg, #fff3e3, var(--amber), #fff3e3);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+            background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: sheen 7s linear infinite;
+}
+
+.brand p {
+    color: var(--muted);
+    font-size: 12px;
+    margin-top: 2px;
+}
+
+.header-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* ================= BUTTONS ================= */
+
+.btn {
+    border: 1px solid var(--border);
+    background: rgba(255,226,200,.05);
+    color: var(--text);
+    padding: 10px 14px;
+    min-height: 40px;
+    border-radius: 11px;
+    transition: transform .2s, background .2s, border-color .2s, box-shadow .2s;
+    font-weight: 700;
+    font-size: 13px;
+}
+
+.btn:hover {
+    background: rgba(255,226,200,.10);
+    border-color: rgba(255,176,46,.35);
+    transform: translateY(-2px);
+}
+
+.btn:active {
+    transform: translateY(0) scale(.97);
+}
+
+.btn-primary {
+    background: linear-gradient(110deg, #ff5f1f, var(--ember), var(--amber), var(--ember));
+    background-size: 250% 100%;
+    border: none;
+    color: #1a0b00;
+    box-shadow: 0 8px 22px rgba(255,122,26,.30);
+    animation: sheen 5s linear infinite;
+}
+
+.btn-primary:hover {
+    background-color: transparent;
+    box-shadow: 0 12px 30px rgba(255,122,26,.50);
+}
+
+.btn-danger {
+    border-color: rgba(255,90,99,.30);
+    color: #ff8a92;
+}
+
+.btn-danger:hover {
+    background: rgba(255,90,99,.10);
+    border-color: rgba(255,90,99,.55);
+}
+
+/* ================= HERO ================= */
+
+.hero {
+    margin: 15px 0 25px;
+    padding: 30px;
+    border: 1px solid var(--border);
+    background:
+        radial-gradient(circle at 100% 0%, rgba(255,77,141,.14), transparent 45%),
+        linear-gradient(135deg, rgba(255,122,26,.13), rgba(255,176,46,.03)),
+        var(--panel);
+    border-radius: 24px;
+    box-shadow: var(--shadow);
+    position: relative;
+    overflow: hidden;
+    animation: rise .7s .08s both;
+}
+
+.hero::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 3px;
+    width: 35%;
+    background: linear-gradient(90deg, transparent, var(--amber), var(--rose), transparent);
+    animation: sweep 4.5s ease-in-out infinite;
+}
+
+.hero h2 {
+    font-family: var(--display);
+    font-size: clamp(26px, 4vw, 42px);
+    letter-spacing: -1.5px;
+    max-width: 800px;
+}
+
+.hero h2 span {
+    background: linear-gradient(90deg, var(--ember), var(--amber), var(--rose), var(--ember));
+    background-size: 250% auto;
+    -webkit-background-clip: text;
+            background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: sheen 5s linear infinite;
+}
+
+.hero p {
+    max-width: 800px;
+    margin-top: 10px;
+    color: var(--muted);
+    line-height: 1.65;
+}
+
+/* ================= GRID ================= */
+
+.main-grid {
+    display: grid;
+    grid-template-columns: 430px 1fr;
+    gap: 20px;
+    align-items: start;
+}
+
+.main-grid > * {
+    min-width: 0;
+}
+
+.card {
+    background: rgba(23,18,15,.86);
+    -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow);
+    transition: border-color .3s, box-shadow .3s, transform .3s;
+    animation: rise .6s both;
+}
+
+.card:hover {
+    border-color: rgba(255,176,46,.28);
+    box-shadow: var(--shadow), 0 0 0 1px rgba(255,122,26,.06), 0 18px 60px rgba(255,122,26,.07);
+}
+
+.card + .card {
+    margin-top: 18px;
+}
+
+.main-grid > *:nth-child(1) .card:nth-child(1) { animation-delay: .15s; }
+.main-grid > *:nth-child(1) .card:nth-child(2) { animation-delay: .25s; }
+.main-grid > *:nth-child(1) .card:nth-child(3) { animation-delay: .35s; }
+.main-grid > *:nth-child(2) .card:nth-child(1) { animation-delay: .20s; }
+.main-grid > *:nth-child(2) .card:nth-child(2) { animation-delay: .30s; }
+.main-grid > *:nth-child(2) .card:nth-child(3) { animation-delay: .40s; }
+
+.card-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 17px;
+}
+
+.card-title h3 {
+    font-family: var(--display);
+    font-size: 16px;
+    letter-spacing: -.2px;
+}
+
+.card-title span {
+    color: var(--muted);
+    font-size: 11px;
+}
+
+/* ================= FORM ================= */
+
+.form-group {
+    margin-bottom: 14px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 7px;
+    font-weight: 700;
+}
+
+input,
+select,
+textarea {
+    width: 100%;
+    border: 1px solid var(--border);
+    background: var(--inset);
+    color: var(--text);
+    border-radius: 11px;
+    padding: 11px 12px;
+    outline: none;
+    transition: border-color .2s, box-shadow .2s, background .2s;
+}
+
+input:hover,
+select:hover,
+textarea:hover {
+    background: var(--inset2);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    border-color: var(--ember);
+    box-shadow: 0 0 0 3px rgba(255,122,26,.16), 0 0 18px rgba(255,122,26,.12);
+}
+
+::placeholder {
+    color: #6f6358;
+}
+
+textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.action-row {
+    display: flex;
+    gap: 9px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+}
+
+.action-row .btn {
+    flex: 1;
+}
+
+/* ================= UPLOAD ================= */
+
+.upload-box {
+    border: 1.5px dashed rgba(255,176,46,.45);
+    border-radius: 15px;
+    padding: 25px 15px;
+    text-align: center;
+    background: rgba(255,122,26,.045);
+    transition: .25s;
+}
+
+.upload-box:hover {
+    background: rgba(255,122,26,.09);
+    border-color: var(--amber);
+}
+
+.upload-box.dragover {
+    border-color: var(--rose);
+    background: rgba(255,77,141,.10);
+    transform: scale(1.015);
+}
+
+.upload-icon {
+    font-size: 30px;
+    margin-bottom: 8px;
+    display: inline-block;
+    animation: bob 2.8s ease-in-out infinite;
+}
+
+@keyframes bob {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-5px); }
+}
+
+.upload-box strong {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.upload-box small {
+    color: var(--muted);
+}
+
+.file-input {
+    display: none;
+}
+
+.preview {
+    width: 100%;
+    max-height: 260px;
+    object-fit: contain;
+    margin-top: 15px;
+    border-radius: 12px;
+    display: none;
+    background: #070504;
+}
+
+/* ================= RESULTS ================= */
+
+.result-top {
+    display: grid;
+    grid-template-columns: 1.25fr .75fr;
+    gap: 15px;
+}
+
+.recommendation {
+    min-height: 210px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    border-radius: 17px;
+    padding: 25px;
+    border: 1px solid var(--border);
+    background:
+        radial-gradient(circle at 0% 0%, rgba(255,122,26,.14), transparent 55%),
+        linear-gradient(145deg, #231a14, #130f0c);
+    transition: box-shadow .5s, border-color .5s;
+}
+
+.recommendation:has(.rec-value.buy) {
+    border-color: rgba(75,227,138,.35);
+    box-shadow: 0 0 40px rgba(75,227,138,.10) inset;
+}
+
+.recommendation:has(.rec-value.sell) {
+    border-color: rgba(255,90,99,.35);
+    box-shadow: 0 0 40px rgba(255,90,99,.10) inset;
+}
+
+.recommendation:has(.rec-value.hold) {
+    border-color: rgba(255,194,51,.28);
+}
+
+.rec-label {
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.rec-value {
+    font-family: var(--display);
+    font-size: clamp(42px, 6vw, 68px);
+    font-weight: 700;
+    margin: 3px 0;
+    letter-spacing: -3px;
+    line-height: 1.05;
+}
+
+.rec-value.buy {
+    color: var(--green);
+    text-shadow: 0 0 28px rgba(75,227,138,.45);
+}
+
+.rec-value.sell {
+    color: var(--red);
+    text-shadow: 0 0 28px rgba(255,90,99,.45);
+}
+
+.rec-value.hold {
+    color: var(--yellow);
+    text-shadow: 0 0 28px rgba(255,194,51,.35);
+}
+
+.reason {
+    color: #d8cdc1;
+    line-height: 1.6;
+    font-size: 13px;
+}
+
+.confidence {
+    padding: 20px;
+    border-radius: 17px;
+    border: 1px solid var(--border);
+    background: var(--inset);
+}
+
+.confidence-number {
+    font-family: var(--display);
+    font-size: 40px;
+    font-weight: 700;
+    margin-top: 8px;
+}
+
+.progress {
+    height: 9px;
+    border-radius: 100px;
+    overflow: hidden;
+    background: #261d17;
+    margin-top: 12px;
+}
+
+.progress span {
+    display: block;
+    position: relative;
+    overflow: hidden;
+    height: 100%;
+    width: 0;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--ember), var(--amber));
+    transition: width .6s cubic-bezier(.2,.8,.2,1);
+}
+
+.progress span::after,
+.score-fill::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    width: 40%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.45), transparent);
+    animation: sweep 2.2s ease-in-out infinite;
+}
+
+.confidence small {
+    color: var(--muted);
+    display: block;
+    margin-top: 10px;
+    line-height: 1.45;
+}
+
+/* ================= METRICS ================= */
+
+.metrics {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.metric {
+    padding: 15px;
+    background: var(--inset);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    transition: transform .25s, border-color .25s;
+}
+
+.metric:hover {
+    transform: translateY(-3px);
+    border-color: rgba(255,176,46,.35);
+}
+
+.metric .name {
+    color: var(--muted);
+    font-size: 11px;
+}
+
+.metric .value {
+    font-family: var(--display);
+    font-size: 18px;
+    font-weight: 700;
+    margin-top: 5px;
+}
+
+.good {
+    color: var(--green);
+}
+
+.bad {
+    color: var(--red);
+}
+
+.neutral {
+    color: var(--yellow);
+}
+
+/* ================= LONG TERM ================= */
+
+.long-term {
+    margin-top: 15px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.long-box {
+    padding: 18px;
+    border-radius: 15px;
+    background: var(--inset);
+    border: 1px solid var(--border);
+}
+
+.long-status {
+    font-family: var(--display);
+    font-size: 22px;
+    font-weight: 700;
+    margin: 7px 0;
+}
+
+.long-box p {
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.55;
+}
+
+/* ================= EXPLANATION ================= */
+
+.insight-list {
+    display: grid;
+    gap: 9px;
+}
+
+.insight {
+    display: flex;
+    gap: 10px;
+    padding: 13px;
+    border-radius: 12px;
+    background: var(--inset);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--ember);
+    line-height: 1.5;
+    color: #ddd2c6;
+    font-size: 13px;
+    transition: transform .2s, background .2s;
+    animation: rise .45s both;
+}
+
+.insight:hover {
+    transform: translateX(4px);
+    background: var(--inset2);
+}
+
+.insight-icon {
+    flex: 0 0 25px;
+}
+
+/* ================= SCORE ================= */
+
+.score-wrap {
+    margin-top: 15px;
+}
+
+.score-bar {
+    height: 16px;
+    background: #261d17;
+    border-radius: 50px;
+    position: relative;
+    overflow: hidden;
+}
+
+.score-fill {
+    height: 100%;
+    width: 50%;
+    position: relative;
+    overflow: hidden;
+    transition: width .6s cubic-bezier(.2,.8,.2,1);
+    background: linear-gradient(90deg, var(--red), var(--yellow), var(--green));
+}
+
+.score-labels {
+    display: flex;
+    justify-content: space-between;
+    color: var(--muted);
+    font-size: 10px;
+    margin-top: 5px;
+}
+
+/* ================= HISTORY ================= */
+
+.history {
+    margin-top: 25px;
+}
+
+.history-list {
+    display: grid;
+    gap: 10px;
+}
+
+.history-item {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 10px;
+    padding: 14px;
+    border: 1px solid var(--border);
+    border-radius: 13px;
+    background: var(--inset);
+    transition: transform .2s, border-color .2s, background .2s;
+    animation: rise .45s both;
+}
+
+.history-item:hover {
+    transform: translateY(-2px);
+    border-color: rgba(255,176,46,.35);
+    background: var(--inset2);
+}
+
+.history-main strong {
+    font-size: 14px;
+}
+
+.history-main small {
+    display: block;
+    color: var(--muted);
+    margin-top: 4px;
+}
+
+.history-signal {
+    font-family: var(--display);
+    font-weight: 700;
+    align-self: center;
+}
+
+.empty {
+    color: var(--muted);
+    text-align: center;
+    padding: 30px;
+    border: 1px dashed var(--border);
+    border-radius: 13px;
+}
+
+/* ================= NOTICE ================= */
+
+.disclaimer {
+    margin: 25px 0 35px;
+    padding: 15px;
+    border-radius: 13px;
+    border: 1px solid rgba(255,194,51,.22);
+    background: rgba(255,194,51,.05);
+    color: #d3c196;
+    font-size: 11px;
+    line-height: 1.6;
+}
+
+footer {
+    text-align: center;
+    color: var(--muted);
+    font-size: 11px;
+    padding-bottom: calc(30px + env(safe-area-inset-bottom));
+}
+
+/* ================= TOAST ================= */
+
+.toast {
+    position: fixed;
+    right: 20px;
+    bottom: calc(20px + env(safe-area-inset-bottom));
+    max-width: calc(100vw - 40px);
+    padding: 13px 17px;
+    border-radius: 12px;
+    background: #2a1e16;
+    border: 1px solid rgba(255,176,46,.35);
+    border-left: 4px solid var(--ember);
+    box-shadow: var(--shadow), 0 0 30px rgba(255,122,26,.18);
+    transform: translateY(140px);
+    opacity: 0;
+    transition: .35s cubic-bezier(.2,.8,.2,1);
+    z-index: 100;
+    font-size: 13px;
+}
+
+.toast.show {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+
+/* ================= API + DATA TABLE ================= */
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin:8px 0 13px}
+.chip{border:1px solid var(--border);background:#241b15;color:#e6d9cb;padding:8px 11px;border-radius:999px;font-size:11px;font-weight:800;cursor:pointer;transition:transform .2s,background .2s,border-color .2s}
+.chip:hover{border-color:rgba(255,176,46,.7);background:#33241a;transform:translateY(-2px)}
+.chip:active{transform:scale(.95)}
+.api-status{margin-top:12px;padding:10px 12px;border-radius:10px;background:var(--inset);border:1px solid var(--border);color:var(--muted);font-size:11px;line-height:1.5}
+.api-status.success{color:#a4f2c4;border-color:rgba(75,227,138,.30)}
+.api-status.error{color:#ff9ca3;border-color:rgba(255,90,99,.30)}
+.data-table-wrap{overflow:auto;-webkit-overflow-scrolling:touch;max-height:430px;border:1px solid var(--border);border-radius:12px}
+.data-table{width:100%;border-collapse:collapse;min-width:900px;font-size:11px}
+.data-table th,.data-table td{padding:9px 10px;text-align:right;border-bottom:1px solid var(--border);white-space:nowrap}
+.data-table th:first-child,.data-table td:first-child{text-align:left}
+.data-table th{position:sticky;top:0;background:#271d16;color:#f0dfcc;z-index:1}
+.data-table td{color:#e6dccf}
+.data-table tbody tr{transition:background .15s}
+.data-table tbody tr:hover{background:rgba(255,122,26,.08)}
+
+/* ================= SCROLLBARS ================= */
+
+* { scrollbar-width: thin; scrollbar-color: #4a3524 transparent; }
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb { background: #4a3524; border-radius: 10px; }
+::selection { background: rgba(255,122,26,.45); color: #fff; }
+
+/* ================= RESPONSIVE ================= */
+
+@media (max-width: 1050px) {
+    .main-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .result-top {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 700px) {
+    header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .hero {
+        padding: 22px;
+        border-radius: 20px;
+    }
+
+    .card {
+        padding: 16px;
+    }
+
+    .metrics {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .long-term {
+        grid-template-columns: 1fr;
+    }
+
+    .two-col {
+        grid-template-columns: 1fr;
+    }
+
+    .header-actions {
+        width: 100%;
+    }
+
+    .header-actions .btn {
+        flex: 1;
+    }
+
+    /* 16px stops iOS Safari zooming into fields; 44px = comfortable tap target */
+    input,
+    select,
+    textarea {
+        font-size: 16px;
+    }
+
+    .btn {
+        min-height: 44px;
+    }
+
+    .toast {
+        left: 16px;
+        right: 16px;
+        max-width: none;
+        text-align: center;
+    }
+}
+
+@media (max-width: 430px) {
+    .app {
+        width: 92%;
+    }
+
+    .metrics {
+        grid-template-columns: 1fr;
+    }
+
+    .rec-value {
+        font-size: 50px;
+    }
+
+    .action-row .btn {
+        flex: 1 1 100%;
+    }
+}
+
+/* respect users who prefer less motion (also saves battery on phones) */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+    }
+}
+
+/* ================= LIGHT THEME (dark remains default) ================= */
+:root { color-scheme: dark; }
+html[data-theme="light"] { color-scheme: light; }
+
+html[data-theme="light"] {
+    --bg: #fbf6f0;
+    --panel: #ffffff;
+    --panel2: #f6ede4;
+    --inset: #fbf5ee;
+    --inset2: #f3e9de;
+    --border: rgba(90,55,25,.15);
+    --text: #261a12;
+    --muted: #6e5d4e;
+    --green: #12934d;
+    --red: #d6303a;
+    --yellow: #b57800;
+    --ember: #ec6a0c;
+    --amber: #e08a00;
+    --rose: #d6336f;
+    --blue: #ec6a0c;
+    --cyan: #e08a00;
+    --shadow: 0 14px 38px rgba(110,70,30,.14);
+    --hint: #7a6a5b;
+    --hint2: #7a6a5b;
+    --hint3: #5f5043;
+}
+html[data-theme="light"] body::before {
+    background:
+        radial-gradient(circle at 18% 12%, rgba(255,122,26,.16), transparent 32%),
+        radial-gradient(circle at 85% 18%, rgba(255,77,141,.10), transparent 30%),
+        radial-gradient(circle at 60% 90%, rgba(18,147,77,.08), transparent 34%);
+}
+html[data-theme="light"] body::after {
+    background-image:
+        linear-gradient(rgba(90,55,25,.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(90,55,25,.05) 1px, transparent 1px);
+}
+html[data-theme="light"] .brand h1 {
+    background: linear-gradient(90deg, #3a2314, var(--ember), #3a2314);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+            background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+html[data-theme="light"] .btn { background: rgba(90,55,25,.05); }
+html[data-theme="light"] .btn:hover { background: rgba(90,55,25,.10); border-color: rgba(236,106,12,.45); }
+html[data-theme="light"] .btn-primary { background: linear-gradient(110deg, #ff5f1f, var(--ember), var(--amber), var(--ember)); background-size: 250% 100%; color: #fff; }
+html[data-theme="light"] .btn-primary:hover { background-color: transparent; }
+html[data-theme="light"] .btn-danger { color: #c4252f; border-color: rgba(214,48,58,.35); }
+html[data-theme="light"] .btn-danger:hover { background: rgba(214,48,58,.08); border-color: rgba(214,48,58,.6); }
+html[data-theme="light"] .hero {
+    background:
+        radial-gradient(circle at 100% 0%, rgba(255,77,141,.10), transparent 45%),
+        linear-gradient(135deg, rgba(255,122,26,.12), rgba(255,176,46,.04)),
+        var(--panel);
+}
+html[data-theme="light"] .card { background: rgba(255,255,255,.88); }
+html[data-theme="light"] .card:hover { border-color: rgba(236,106,12,.35); }
+html[data-theme="light"] ::placeholder { color: #a8998a; }
+html[data-theme="light"] .preview { background: #efe5da; }
+html[data-theme="light"] .progress,
+html[data-theme="light"] .score-bar { background: #eadfd3; }
+html[data-theme="light"] .toast { background: #ffffff; border-color: rgba(236,106,12,.4); }
+html[data-theme="light"] .chip { background: #f6ede4; color: #3b2a1d; }
+html[data-theme="light"] .chip:hover { background: #fde6d0; border-color: rgba(236,106,12,.7); }
+html[data-theme="light"] .api-status.success { color: #0d7a3f; border-color: rgba(18,147,77,.35); }
+html[data-theme="light"] .api-status.error { color: #c4252f; border-color: rgba(214,48,58,.35); }
+html[data-theme="light"] .data-table th { background: #f3e7da; color: #3b2a1d; }
+html[data-theme="light"] .data-table td { color: #3b2a1d; }
+html[data-theme="light"] .data-table tbody tr:hover { background: rgba(236,106,12,.08); }
+html[data-theme="light"] * { scrollbar-color: #d6bda3 transparent; }
+html[data-theme="light"] ::-webkit-scrollbar-thumb { background: #d6bda3; }
+html[data-theme="light"] ::selection { background: rgba(236,106,12,.35); color: #000; }
+
+/* theme toggle button */
+.theme-toggle { display: inline-flex; align-items: center; gap: 6px; }
+.theme-toggle .ti { font-size: 15px; line-height: 1; }
+body, .card, .hero, input, select, textarea, .btn, .chip, .toast {
+    transition-property: background, background-color, color, border-color, box-shadow, transform;
+}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+</head>
+
+<body>
+
+<div class="app">
+
+<header>
+    <div class="brand">
+        <div class="logo">₹</div>
+        <div>
+            <h1>MARKET INTELLIGENCE SYSTEM</h1>
+            <p>Beginner-friendly stock market analyzer</p>
+        </div>
+    </div>
+
+    <div class="header-actions">
+        <button class="btn theme-toggle" id="themeToggle" type="button" onclick="toggleTheme()" aria-label="Switch light/dark mode" title="Switch light/dark mode"><span class="ti" id="themeIcon">☀️</span><span id="themeLabel">Light</span></button>
+        <button class="btn" onclick="downloadPDF()">📄 PDF</button>
+        <button class="btn" onclick="downloadExcel()">📊 Excel</button>
+        <button class="btn" onclick="exportHistory()">⬇ History</button>
+        <button class="btn btn-danger" onclick="clearAll()">🗑 Clear All</button>
+    </div>
+</header>
+
+<section class="hero">
+    <h2>Decode the stock <span>Skip the finance headache.</span></h2>
+    <p>
+        Load weekly adjusted stock data directly from Alpha Vantage. StockScope caches
+        successful API responses for the same day, then uses trend, momentum, RSI
+        and moving-average signals to create an easy-to-read educational analysis.
+    </p>
+</section>
+
+<div class="main-grid">
+
+<!-- ================= LEFT PANEL ================= -->
+
+<div>
+
+<div class="card">
+
+    <div class="card-title">
+        <h3>📡 Alpha Vantage Data</h3>
+        <span>API + daily cache</span>
+    </div>
+
+    <div class="form-group">
+        <label>Alpha Vantage API Key</label>
+        <input id="apiKey" type="password" placeholder="Enter your Alpha Vantage key">
+        <small style="color:var(--hint,#7f8da3);display:block;margin-top:6px;">Your key is stored only in this browser.</small>
+    </div>
+
+    <div class="form-group">
+        <label>Stock Symbol</label>
+        <input id="symbol" type="text" placeholder="Example: RELIANCE.BSE" autocomplete="off">
+    </div>
+
+    <div class="chips" id="symbolChips">
+        <button type="button" class="chip" data-symbol="IBM">IBM</button>
+        <button type="button" class="chip" data-symbol="RELIANCE.BSE">RELIANCE.BSE</button>
+        <button type="button" class="chip" data-symbol="TCS.BSE">TCS.BSE</button>
+        <button type="button" class="chip" data-symbol="INFY.BSE">INFY.BSE</button>
+    </div>
+
+    <div class="action-row">
+        <button class="btn btn-primary" onclick="loadStock(false)">📥 Load</button>
+        <button class="btn" onclick="loadStock(true)">🔄 Refresh from API</button>
+    </div>
+
+    <div id="apiStatus" class="api-status">Choose a symbol and click Load.</div>
+
+</div>
+
+<div class="card">
+    <div class="card-title">
+        <h3>📊 Loaded Data</h3>
+        <span id="dataSummary">No data loaded</span>
+    </div>
+    <div class="data-table-wrap">
+        <table class="data-table">
+            <thead><tr><th>Date</th><th>Open</th><th>High</th><th>Low</th><th>Close</th><th>Adjusted Close</th><th>Volume</th><th>Dividend</th></tr></thead>
+            <tbody id="dataTableBody"><tr><td colspan="8" class="empty">Load a stock to see API data.</td></tr></tbody>
+        </table>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-title">
+        <h3>⚙️ Analysis Controls</h3>
+    </div>
+    <div class="action-row">
+        <button class="btn btn-primary" onclick="analyzeStock()">🔍 Analyze Loaded Stock</button>
+        <button class="btn" onclick="resetForm()">↻ Reset</button>
+    </div>
+</div>
+
+<div class="card">
+
+    <div class="card-title">
+        <h3>🖼️ Chart Screenshot</h3>
+        <span>Optional</span>
+    </div>
+
+    <div
+        class="upload-box"
+        id="uploadBox"
+        onclick="document.getElementById('chartImage').click()"
+    >
+
+        <div class="upload-icon">📷</div>
+
+        <strong>Upload Stock Chart</strong>
+
+        <small>
+            PNG, JPG, JPEG or WEBP
+        </small>
+
+        <input
+            id="chartImage"
+            class="file-input"
+            type="file"
+            accept="image/*"
+        >
+
+        <img
+            id="preview"
+            class="preview"
+            alt="Chart preview"
+        >
+
+    </div>
+
+    <p style="
+        color:var(--hint2,#8290a5);
+        font-size:11px;
+        line-height:1.5;
+        margin-top:12px;
+    ">
+        The local analyzer estimates visual direction from the uploaded
+        image. For more accurate technical analysis, enter closing prices
+        above as well.
+    </p>
+
+</div>
+
+</div>
+
+<!-- ================= RIGHT PANEL ================= -->
+
+<div>
+
+<div class="card">
+
+    <div class="card-title">
+        <h3>🎯 Recommendation</h3>
+        <span id="analysisTime">Waiting for analysis</span>
+    </div>
+
+    <div class="result-top">
+
+        <div class="recommendation">
+
+            <div class="rec-label">Current Signal</div>
+
+            <div id="recommendation"
+                 class="rec-value hold">
+                HOLD
+            </div>
+
+            <p id="reason" class="reason">
+                Enter stock information and click “Analyze Stock” to
+                generate an educational analysis.
+            </p>
+
+        </div>
+
+        <div class="confidence">
+
+            <div class="rec-label">Signal Strength</div>
+
+            <div id="confidenceNumber"
+                 class="confidence-number">
+                0%
+            </div>
+
+            <div class="progress">
+                <span id="confidenceBar"></span>
+            </div>
+
+            <small id="confidenceText">
+                No analysis has been performed yet.
+            </small>
+
+        </div>
+
+    </div>
+
+    <div class="metrics">
+
+        <div class="metric">
+            <div class="name">Momentum</div>
+            <div id="momentum" class="value neutral">—</div>
+        </div>
+
+        <div class="metric">
+            <div class="name">Trend</div>
+            <div id="trend" class="value neutral">—</div>
+        </div>
+
+        <div class="metric">
+            <div class="name">RSI</div>
+            <div id="rsi" class="value neutral">—</div>
+        </div>
+
+        <div class="metric">
+            <div class="name">52W Position</div>
+            <div id="position52" class="value neutral">—</div>
+        </div>
+
+    </div>
+
+    <div class="score-wrap">
+
+        <div style="
+            display:flex;
+            justify-content:space-between;
+            margin-bottom:7px;
+            font-size:12px;
+            color:var(--hint3,#a6b1c1);
+        ">
+            <span>Bearish</span>
+            <strong id="scoreText">Neutral</strong>
+            <span>Bullish</span>
+        </div>
+
+        <div class="score-bar">
+            <div id="scoreFill" class="score-fill"></div>
+        </div>
+
+        <div class="score-labels">
+            <span>SELL</span>
+            <span>HOLD</span>
+            <span>BUY</span>
+        </div>
+
+    </div>
+
+</div>
+
+<div class="card">
+
+    <div class="card-title">
+        <h3>🌱 Long-Term View</h3>
+        <span>Educational indicator</span>
+    </div>
+
+    <div class="long-term">
+
+        <div class="long-box">
+
+            <div class="rec-label">
+                Long-Term Suitability
+            </div>
+
+            <div id="longStatus"
+                 class="long-status neutral">
+                Not evaluated
+            </div>
+
+            <p id="longReason">
+                Provide price information to evaluate the
+                long-term technical picture.
+            </p>
+
+        </div>
+
+        <div class="long-box">
+
+            <div class="rec-label">
+                What This Means
+            </div>
+
+            <p id="longMeaning" style="margin-top:8px;">
+                A positive long-term signal does not guarantee future returns.
+                Always consider business fundamentals, valuation, debt,
+                competition and your own risk tolerance.
+            </p>
+
+        </div>
+
+    </div>
+
+</div>
+
+<div class="card">
+
+    <div class="card-title">
+        <h3>💡 Why This Signal?</h3>
+        <span>Simple explanation</span>
+    </div>
+
+    <div id="insights" class="insight-list">
+
+        <div class="insight">
+            <div class="insight-icon">ℹ️</div>
+            <div>
+                Enter your data and run an analysis to see the
+                factors behind the recommendation.
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<div class="card history">
+
+    <div class="card-title">
+        <h3>🕘 Analysis History</h3>
+        <span id="historyCount">0 saved</span>
+    </div>
+
+    <div id="historyList" class="history-list">
+        <div class="empty">
+            No analysis history yet.
+        </div>
+    </div>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="disclaimer">
+    <strong>Important:</strong>
+    StockScope is an educational analysis tool, not a financial adviser.
+    Buy, Sell and Hold signals are generated from simplified technical
+    calculations and optional visual chart analysis. They are not guaranteed
+    predictions of future stock prices. Never invest money solely because
+    of an automated signal. Consider company fundamentals, valuation,
+    market conditions and your own risk tolerance before making investment
+    decisions.
+</div>
+
+<footer>
+    MIS © 2026 · Made with Love by Sidharth & Team · Runs locally in your browser · Alpha Vantage data · API key and cache stay in this browser
+</footer>
+
+</div>
+
+<div id="toast" class="toast"></div>
+<div style="display:none">
+<input id="stockName"><input id="currentPrice"><input id="previousPrice"><input id="high52"><input id="low52"><select id="horizon"><option value="long" selected>Long Term</option></select><textarea id="priceHistory"></textarea>
+</div>
+
+
+<script>
+/* ============================================================
+   STOCKSCOPE
+   Single-file stock market analyzer
+   No external libraries / APIs
+============================================================ */
+
+const STORAGE_KEY = "stockscope_history_v1";
+const SETTINGS_KEY = "stockscope_settings_v2";
+const API_KEY_STORAGE = "stockscope_alpha_vantage_key_v1";
+const API_CACHE_PREFIX = "stockscope_alpha_cache_v1_";
+let loadedSymbol = "";
+let loadedRows = [];
+let loadedRawJSON = null;
+
+let uploadedImageScore = null;
+let uploadedImageName = "";
+
+/* ================= BASIC HELPERS ================= */
+
+function $(id) {
+    return document.getElementById(id);
+}
+
+function number(value) {
+    const n = parseFloat(value);
+    return Number.isFinite(n) ? n : null;
+}
+
+function formatRupee(value) {
+    if (value === null || !Number.isFinite(value)) return "—";
+
+    return "₹" + value.toLocaleString("en-IN", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    });
+}
+
+function clamp(value, min, max) {
+    return Math.min(Math.max(value, min), max);
+}
+
+function showToast(message) {
+    const toast = $("toast");
+
+    toast.textContent = message;
+    toast.classList.add("show");
+
+    clearTimeout(window.toastTimer);
+
+    window.toastTimer = setTimeout(() => {
+        toast.classList.remove("show");
+    }, 2600);
+}
+
+/* ================= RSI ================= */
+
+function calculateRSI(prices, period = 14) {
+
+    if (!prices || prices.length < 3) return null;
+
+    const usablePeriod = Math.min(period, prices.length - 1);
+
+    let gains = 0;
+    let losses = 0;
+
+    for (let i = prices.length - usablePeriod; i < prices.length; i++) {
+
+        const change = prices[i] - prices[i - 1];
+
+        if (change > 0) {
+            gains += change;
+        } else {
+            losses += Math.abs(change);
+        }
+    }
+
+    const avgGain = gains / usablePeriod;
+    const avgLoss = losses / usablePeriod;
+
+    if (avgLoss === 0) return 100;
+
+    const rs = avgGain / avgLoss;
+
+    return 100 - (100 / (1 + rs));
+}
+
+/* ================= SMA ================= */
+
+function sma(prices, period) {
+
+    if (!prices.length) return null;
+
+    const p = Math.min(period, prices.length);
+
+    const values = prices.slice(-p);
+
+    return values.reduce((a, b) => a + b, 0) / values.length;
+}
+
+/* ================= TREND ================= */
+
+function calculateTrend(prices) {
+
+    if (!prices || prices.length < 2) {
+        return {
+            name: "Unknown",
+            score: 0
+        };
+    }
+
+    const first = prices[0];
+    const last = prices[prices.length - 1];
+
+    const change = ((last - first) / first) * 100;
+
+    if (change > 5) {
+        return {
+            name: "Strong Uptrend",
+            score: 2
+        };
+    }
+
+    if (change > 1) {
+        return {
+            name: "Uptrend",
+            score: 1
+        };
+    }
+
+    if (change < -5) {
+        return {
+            name: "Strong Downtrend",
+            score: -2
+        };
+    }
+
+    if (change < -1) {
+        return {
+            name: "Downtrend",
+            score: -1
+        };
+    }
+
+    return {
+        name: "Sideways",
+        score: 0
+    };
+}
+
+/* ================= MOMENTUM ================= */
+
+function calculateMomentum(prices) {
+
+    if (!prices || prices.length < 2) {
+        return {
+            percentage: null,
+            name: "Unknown",
+            score: 0
+        };
+    }
+
+    const lookback = Math.min(5, prices.length - 1);
+
+    const oldPrice = prices[prices.length - 1 - lookback];
+    const latest = prices[prices.length - 1];
+
+    const percentage = ((latest - oldPrice) / oldPrice) * 100;
+
+    let name = "Neutral";
+    let score = 0;
+
+    if (percentage > 4) {
+        name = "Strong";
+        score = 2;
+    } else if (percentage > 1) {
+        name = "Positive";
+        score = 1;
+    } else if (percentage < -4) {
+        name = "Weak";
+        score = -2;
+    } else if (percentage < -1) {
+        name = "Negative";
+        score = -1;
+    }
+
+    return {
+        percentage,
+        name,
+        score
+    };
+}
+
+/* ================= PRICE POSITION ================= */
+
+function calculate52WeekPosition(current, high, low) {
+
+    if (
+        current === null ||
+        high === null ||
+        low === null ||
+        high <= low
+    ) {
+        return null;
+    }
+
+    return ((current - low) / (high - low)) * 100;
+}
+
+/* ================= CHART IMAGE ================= */
+
+/*
+   This is deliberately a lightweight local image heuristic.
+
+   It does NOT claim to understand arbitrary chart screenshots.
+   It estimates whether the visible chart contains a generally
+   rising or falling visual distribution.
+*/
+
+function analyzeImagePixels(image) {
+
+    return new Promise((resolve) => {
+
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d", {
+            willReadFrequently: true
+        });
+
+        const maxWidth = 700;
+
+        const scale = Math.min(
+            1,
+            maxWidth / image.naturalWidth
+        );
+
+        canvas.width = Math.max(1, Math.floor(image.naturalWidth * scale));
+        canvas.height = Math.max(1, Math.floor(image.naturalHeight * scale));
+
+        ctx.drawImage(
+            image,
+            0,
+            0,
+            canvas.width,
+            canvas.height
+        );
+
+        const data = ctx.getImageData(
+            0,
+            0,
+            canvas.width,
+            canvas.height
+        ).data;
+
+        /*
+           We divide the image into vertical bands.
+           For each band we estimate where darker/high-contrast
+           pixels appear. This can loosely detect a line/chart path.
+        */
+
+        const bands = 12;
+        const centers = [];
+
+        for (let b = 0; b < bands; b++) {
+
+            const xStart = Math.floor(
+                b * canvas.width / bands
+            );
+
+            const xEnd = Math.floor(
+                (b + 1) * canvas.width / bands
+            );
+
+            let weightedY = 0;
+            let weight = 0;
+
+            for (let x = xStart; x < xEnd; x += 2) {
+
+                for (
+                    let y = 0;
+                    y < canvas.height;
+                    y += 3
+                ) {
+
+                    const i =
+                        (y * canvas.width + x) * 4;
+
+                    const r = data[i];
+                    const g = data[i + 1];
+                    const bl = data[i + 2];
+
+                    const brightness =
+                        (r + g + bl) / 3;
+
+                    const saturation =
+                        Math.max(r, g, bl) -
+                        Math.min(r, g, bl);
+
+                    /*
+                       Favor colorful/high contrast pixels.
+                    */
+
+                    const w =
+                        Math.max(
+                            0,
+                            saturation - 25
+                        ) +
+                        Math.max(
+                            0,
+                            120 - brightness
+                        ) * .35;
+
+                    if (w > 10) {
+
+                        weightedY += y * w;
+                        weight += w;
+                    }
+                }
+            }
+
+            if (weight > 0) {
+                centers.push(weightedY / weight);
+            } else {
+                centers.push(null);
+            }
+        }
+
+        const valid = centers.filter(
+            x => x !== null
+        );
+
+        if (valid.length < 4) {
+            resolve(null);
+            return;
+        }
+
+        const first =
+            valid.slice(0, Math.ceil(valid.length / 3))
+                 .reduce((a,b) => a+b,0) /
+            Math.ceil(valid.length / 3);
+
+        const last =
+            valid.slice(-Math.ceil(valid.length / 3))
+                 .reduce((a,b) => a+b,0) /
+            Math.ceil(valid.length / 3);
+
+        /*
+           Smaller Y means visually higher on screen.
+           Therefore:
+           lastY < firstY = rising visual trend.
+        */
+
+        const difference = first - last;
+
+        let score = 0;
+
+        if (difference > canvas.height * .06) {
+            score = 2;
+        } else if (difference > canvas.height * .02) {
+            score = 1;
+        } else if (difference < -canvas.height * .06) {
+            score = -2;
+        } else if (difference < -canvas.height * .02) {
+            score = -1;
+        }
+
+        resolve({
+            score,
+            difference,
+            sampleCount: valid.length
+        });
+    });
+}
+
+/* ================= FILE UPLOAD ================= */
+
+$("chartImage").addEventListener("change", handleImage);
+
+function handleImage(event) {
+
+    const file = event.target.files[0];
+
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+        showToast("Please select an image file.");
+        return;
+    }
+
+    uploadedImageName = file.name;
+
+    const reader = new FileReader();
+
+    reader.onload = function(e) {
+
+        $("preview").src = e.target.result;
+        $("preview").style.display = "block";
+
+        const img = new Image();
+
+        img.onload = async function() {
+
+            uploadedImageScore =
+                await analyzeImagePixels(img);
+
+            if (uploadedImageScore) {
+                showToast("Chart image analyzed locally.");
+            } else {
+                showToast(
+                    "Image loaded. Enter price data for better analysis."
+                );
+            }
+        };
+
+        img.src = e.target.result;
+    };
+
+    reader.readAsDataURL(file);
+}
+
+/* ================= DRAG & DROP ================= */
+
+const uploadBox = $("uploadBox");
+
+["dragenter", "dragover"].forEach(eventName => {
+
+    uploadBox.addEventListener(eventName, (e) => {
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        uploadBox.classList.add("dragover");
+    });
+});
+
+["dragleave", "drop"].forEach(eventName => {
+
+    uploadBox.addEventListener(eventName, (e) => {
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        uploadBox.classList.remove("dragover");
+    });
+});
+
+uploadBox.addEventListener("drop", (e) => {
+
+    const files = e.dataTransfer.files;
+
+    if (!files.length) return;
+
+    const file = files[0];
+
+    if (!file.type.startsWith("image/")) {
+        showToast("Please drop an image.");
+        return;
+    }
+
+    $("chartImage").files = files;
+
+    handleImage({
+        target: {
+            files: files
+        }
+    });
+});
+
+/* ================= PARSE PRICE HISTORY ================= */
+
+function parsePrices() {
+    if (loadedRows.length) return loadedRows.map(row => row.adjustedClose);
+    return [];
+}
+
+/* ================= ALPHA VANTAGE API ================= */
+
+function cacheKey(symbol) {
+    return API_CACHE_PREFIX + encodeURIComponent(symbol.toUpperCase());
+}
+
+function todayKey() {
+    const d = new Date();
+    return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+}
+
+function setApiStatus(message, type="") {
+    const el = $("apiStatus");
+    if (!el) return;
+    el.textContent = message;
+    el.className = "api-status" + (type ? " " + type : "");
+}
+
+function saveApiKey() {
+    const key = $("apiKey").value.trim();
+    if (key) localStorage.setItem(API_KEY_STORAGE, key);
+}
+
+function getCachedResponse(symbol) {
+    try {
+        const raw = localStorage.getItem(cacheKey(symbol));
+        if (!raw) return null;
+        const item = JSON.parse(raw);
+        return item.date === todayKey() && item.json ? item : null;
+    } catch (e) {
+        return null;
+    }
+}
+
+function saveCachedResponse(symbol, json) {
+    localStorage.setItem(cacheKey(symbol), JSON.stringify({
+        symbol: symbol.toUpperCase(),
+        date: todayKey(),
+        json: json
+    }));
+}
+
+function normaliseAlphaSeries(json) {
+    const series = json["Weekly Adjusted Time Series"] || json["Monthly Adjusted Time Series"];
+    if (!series || typeof series !== "object") return [];
+
+    return Object.entries(series).map(([date, values]) => ({
+        date,
+        open: number(values["1. open"]),
+        high: number(values["2. high"]),
+        low: number(values["3. low"]),
+        close: number(values["4. close"]),
+        adjustedClose: number(values["5. adjusted close"]),
+        volume: number(values["6. volume"]),
+        dividend: number(values["7. dividend amount"])
+    })).filter(r => r.adjustedClose !== null).sort((a,b) => a.date.localeCompare(b.date));
+}
+
+async function loadStock(forceRefresh = false) {
+    const symbol = $("symbol").value.trim().toUpperCase();
+    const key = $("apiKey").value.trim() || localStorage.getItem(API_KEY_STORAGE) || "";
+
+    if (!symbol) { showToast("Enter a stock symbol first."); return; }
+    if (!key) { showToast("Enter your Alpha Vantage API key first."); return; }
+
+    saveApiKey();
+    setApiStatus(forceRefresh ? "Refreshing from Alpha Vantage..." : "Checking today's cache...");
+
+    if (!forceRefresh) {
+        const cached = getCachedResponse(symbol);
+        if (cached) {
+            useAlphaResponse(symbol, cached.json, true);
+            return;
+        }
+    }
+
+    const url = "https://www.alphavantage.co/query?function=TIME_SERIES_WEEKLY_ADJUSTED&symbol=" + encodeURIComponent(symbol) + "&apikey=" + encodeURIComponent(key);
+
+    try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error("HTTP " + response.status);
+        const json = await response.json();
+
+        if (json["Error Message"]) throw new Error(json["Error Message"]);
+        if (json["Note"]) throw new Error("Alpha Vantage rate limit reached. Wait before trying again.");
+
+        const rows = normaliseAlphaSeries(json);
+        if (!rows.length) throw new Error("No weekly adjusted time-series data was returned for this symbol.");
+
+        saveCachedResponse(symbol, json);
+        useAlphaResponse(symbol, json, false);
+    } catch (error) {
+        console.error(error);
+        setApiStatus("Could not load data: " + error.message, "error");
+        showToast("API request failed. Check the symbol, key and daily limit.");
+    }
+}
+
+function useAlphaResponse(symbol, json, fromCache) {
+    const rows = normaliseAlphaSeries(json);
+    if (!rows.length) {
+        setApiStatus("The saved response does not contain a supported adjusted time series.", "error");
+        return;
+    }
+
+    loadedSymbol = symbol;
+    loadedRows = rows;
+    loadedRawJSON = json;
+
+    $("symbol").value = symbol;
+    $("dataSummary").textContent = rows.length + " rows · " + (fromCache ? "today's cache" : "fresh API");
+    renderDataTable();
+    populateAnalysisFields();
+    setApiStatus((fromCache ? "Loaded from today's local cache. No API call was made. " : "Loaded fresh data from Alpha Vantage. ") + rows.length + " weekly records available.", "success");
+    showToast(fromCache ? symbol + " loaded from cache." : symbol + " loaded from Alpha Vantage.");
+    analyzeStock();
+}
+
+function renderDataTable() {
+    const body = $("dataTableBody");
+    if (!loadedRows.length) {
+        body.innerHTML = '<tr><td colspan="8" class="empty">No data loaded.</td></tr>';
+        return;
+    }
+    body.innerHTML = loadedRows.slice().reverse().map(r => `
+        <tr>
+            <td>${escapeHTML(r.date)}</td>
+            <td>${r.open?.toFixed(2) ?? "—"}</td>
+            <td>${r.high?.toFixed(2) ?? "—"}</td>
+            <td>${r.low?.toFixed(2) ?? "—"}</td>
+            <td>${r.close?.toFixed(2) ?? "—"}</td>
+            <td>${r.adjustedClose?.toFixed(2) ?? "—"}</td>
+            <td>${r.volume?.toLocaleString("en-IN") ?? "—"}</td>
+            <td>${r.dividend?.toFixed(4) ?? "—"}</td>
+        </tr>`).join("");
+}
+
+function populateAnalysisFields() {
+    if (!loadedRows.length) return;
+    const latest = loadedRows[loadedRows.length - 1];
+    const prev = loadedRows.length > 1 ? loadedRows[loadedRows.length - 2] : null;
+    const recent52 = loadedRows.slice(-52);
+
+    // Keep hidden/legacy fields populated so the existing analyzer can continue to work.
+    $("stockName").value = loadedSymbol;
+    $("currentPrice").value = latest.adjustedClose.toFixed(2);
+    $("previousPrice").value = prev ? prev.adjustedClose.toFixed(2) : "";
+    $("high52").value = Math.max(...recent52.map(r => r.high)).toFixed(2);
+    $("low52").value = Math.min(...recent52.map(r => r.low)).toFixed(2);
+    $("priceHistory").value = loadedRows.map(r => r.adjustedClose).join(", ");
+}
+
+/* ================= ANALYSIS ================= */
+
+async function analyzeStock(save = true) {
+
+    const name = loadedSymbol || $("symbol").value.trim() || "Unnamed Stock";
+
+    let current = loadedRows.length ? loadedRows[loadedRows.length - 1].adjustedClose : null;
+    const previous = loadedRows.length > 1 ? loadedRows[loadedRows.length - 2].adjustedClose : null;
+
+    const recent52 = loadedRows.slice(-52);
+    const high52 = recent52.length ? Math.max(...recent52.map(r => r.high)) : null;
+    const low52 = recent52.length ? Math.min(...recent52.map(r => r.low)) : null;
+
+    let prices = parsePrices();
+
+    /*
+       If current price is entered but isn't included in the
+       historical series, add it to the end.
+    */
+
+    if (current !== null) {
+
+        if (
+            prices.length === 0 ||
+            Math.abs(prices[prices.length - 1] - current) > 0.0001
+        ) {
+            prices.push(current);
+        }
+
+    } else if (prices.length > 0) {
+
+        current = prices[prices.length - 1];
+
+    }
+
+    if (current === null && prices.length === 0) {
+
+        showToast(
+            "Please enter a current price or historical prices."
+        );
+
+        return;
+    }
+
+    const trend =
+        calculateTrend(prices);
+
+    const momentum =
+        calculateMomentum(prices);
+
+    const rsi =
+        calculateRSI(prices);
+
+    const position52 =
+        calculate52WeekPosition(
+            current,
+            high52,
+            low52
+        );
+
+    /*
+       Moving averages
+    */
+
+    const sma5 = sma(prices, 5);
+    const sma10 = sma(prices, 10);
+    const sma20 = sma(prices, 20);
+
+    let score = 0;
+    let factors = [];
+
+    /* Trend */
+
+    score += trend.score;
+
+    if (trend.score > 0) {
+        factors.push({
+            icon: "📈",
+            text: "The recent price sequence shows an upward trend."
+        });
+    } else if (trend.score < 0) {
+        factors.push({
+            icon: "📉",
+            text: "The recent price sequence shows downward pressure."
+        });
+    } else {
+        factors.push({
+            icon: "↔️",
+            text: "The recent price movement appears relatively sideways."
+        });
+    }
+
+    /* Momentum */
+
+    score += momentum.score;
+
+    if (momentum.score > 0) {
+
+        factors.push({
+            icon: "⚡",
+            text:
+                "Short-term momentum is positive, suggesting buyers have recently had more control."
+        });
+
+    } else if (momentum.score < 0) {
+
+        factors.push({
+            icon: "⚠️",
+            text:
+                "Recent momentum is weak, which suggests caution."
+        });
+
+    } else {
+
+        factors.push({
+            icon: "➖",
+            text:
+                "Recent momentum is neither strongly positive nor negative."
+        });
+    }
+
+    /* RSI */
+
+    if (rsi !== null) {
+
+        if (rsi < 30) {
+
+            score += 1;
+
+            factors.push({
+                icon: "🟢",
+                text:
+                    `RSI is ${rsi.toFixed(1)}, which is in an oversold area. This can indicate that selling pressure may have become excessive.`
+            });
+
+        } else if (rsi > 70) {
+
+            score -= 1;
+
+            factors.push({
+                icon: "🔴",
+                text:
+                    `RSI is ${rsi.toFixed(1)}, which is in an overbought area. This suggests caution because the stock may have risen quickly.`
+            });
+
+        } else {
+
+            factors.push({
+                icon: "🟡",
+                text:
+                    `RSI is ${rsi.toFixed(1)}, which is within a more neutral range.`
+            });
+        }
+    }
+
+    /* Moving average */
+
+    if (sma20 !== null && current !== null) {
+
+        if (current > sma20) {
+
+            score += 1;
+
+            factors.push({
+                icon: "📊",
+                text:
+                    `The current price is above its recent moving average of ${formatRupee(sma20)}.`
+            });
+
+        } else {
+
+            score -= 1;
+
+            factors.push({
+                icon: "📊",
+                text:
+                    `The current price is below its recent moving average of ${formatRupee(sma20)}.`
+            });
+        }
+    }
+
+    /* 52 week position */
+
+    if (position52 !== null) {
+
+        if (position52 > 80) {
+
+            factors.push({
+                icon: "🏔️",
+                text:
+                    `The stock is around ${position52.toFixed(0)}% of its 52-week range, relatively close to the high.`
+            });
+
+        } else if (position52 < 25) {
+
+            factors.push({
+                icon: "🔎",
+                text:
+                    `The stock is around ${position52.toFixed(0)}% of its 52-week range, relatively close to the low.`
+            });
+
+        } else {
+
+            factors.push({
+                icon: "📍",
+                text:
+                    `The stock is around ${position52.toFixed(0)}% of its 52-week range.`
+            });
+        }
+    }
+
+    /* Previous price */
+
+    if (previous !== null && current !== null) {
+
+        const dayChange =
+            ((current - previous) / previous) * 100;
+
+        if (dayChange > 0) {
+
+            factors.push({
+                icon: "💹",
+                text:
+                    `The latest price is ${dayChange.toFixed(2)}% higher than the previous price.`
+            });
+
+        } else if (dayChange < 0) {
+
+            factors.push({
+                icon: "📉",
+                text:
+                    `The latest price is ${Math.abs(dayChange).toFixed(2)}% lower than the previous price.`
+            });
+
+        }
+    }
+
+    /* Image signal */
+
+    if (uploadedImageScore) {
+
+        score += uploadedImageScore.score * .5;
+
+        if (uploadedImageScore.score > 0) {
+
+            factors.push({
+                icon: "🖼️",
+                text:
+                    "The uploaded chart image also appears to show an upward visual direction."
+            });
+
+        } else if (uploadedImageScore.score < 0) {
+
+            factors.push({
+                icon: "🖼️",
+                text:
+                    "The uploaded chart image appears to show downward visual direction."
+            });
+
+        } else {
+
+            factors.push({
+                icon: "🖼️",
+                text:
+                    "The uploaded chart image does not show a strong directional bias using the local visual heuristic."
+            });
+        }
+    }
+
+    /* ================= SIGNAL ================= */
+
+    let signal;
+    let signalClass;
+
+    if (score >= 3) {
+
+        signal = "BUY";
+        signalClass = "buy";
+
+    } else if (score <= -2) {
+
+        signal = "SELL";
+        signalClass = "sell";
+
+    } else {
+
+        signal = "HOLD";
+        signalClass = "hold";
+    }
+
+    /*
+       Confidence is based on strength of agreement,
+       not probability of making money.
+    */
+
+    const maxExpected = 7;
+
+    let confidence =
+        50 +
+        Math.min(
+            42,
+            Math.abs(score) / maxExpected * 42
+        );
+
+    /*
+       If there is insufficient information,
+       reduce confidence.
+    */
+
+    if (prices.length < 4) {
+        confidence -= 15;
+    }
+
+    if (
+        current === null ||
+        high52 === null ||
+        low52 === null
+    ) {
+        confidence -= 5;
+    }
+
+    confidence = clamp(
+        Math.round(confidence),
+        15,
+        92
+    );
+
+    /* ================= LONG TERM ================= */
+
+    let longStatus;
+    let longClass;
+    let longReason;
+
+    let longScore = 0;
+
+    if (trend.score > 0) longScore++;
+    if (momentum.score > 0) longScore++;
+
+    if (
+        sma20 !== null &&
+        current !== null &&
+        current > sma20
+    ) {
+        longScore++;
+    }
+
+    if (
+        position52 !== null &&
+        position52 > 25 &&
+        position52 < 90
+    ) {
+        longScore++;
+    }
+
+    if (rsi !== null && rsi >= 40 && rsi <= 65) {
+        longScore++;
+    }
+
+    if (longScore >= 4) {
+
+        longStatus = "Favourable";
+        longClass = "good";
+
+        longReason =
+            "The available technical signals are generally supportive of a longer-term positive trend.";
+
+    } else if (longScore >= 2) {
+
+        longStatus = "Mixed";
+        longClass = "neutral";
+
+        longReason =
+            "Some technical signals are positive, but there are also factors that suggest caution.";
+
+    } else {
+
+        longStatus = "Cautious";
+        longClass = "bad";
+
+        longReason =
+            "The available technical picture is not strong enough to support a confident long-term view.";
+    }
+
+    /* ================= REASON ================= */
+
+    let reason;
+
+    if (signal === "BUY") {
+
+        reason =
+            "The available indicators are leaning positive. The trend and/or momentum signals suggest that buyers currently have an advantage. This is an educational signal, not a guaranteed prediction.";
+
+    } else if (signal === "SELL") {
+
+        reason =
+            "The available indicators are leaning negative. Recent trend and momentum suggest caution and possible selling pressure. This is an educational signal, not a guaranteed prediction.";
+
+    } else {
+
+        reason =
+            "The available indicators are mixed or not strong enough for a clear directional signal. Waiting for stronger confirmation may be more sensible than making an immediate decision.";
+    }
+
+    /* ================= UPDATE UI ================= */
+
+    const rec =
+        $("recommendation");
+
+    rec.textContent = signal;
+    rec.className =
+        "rec-value " + signalClass;
+
+    $("reason").textContent = reason;
+
+    $("confidenceNumber").textContent =
+        confidence + "%";
+
+    $("confidenceBar").style.width =
+        confidence + "%";
+
+    $("confidenceText").textContent =
+        confidence >= 70
+            ? "Signals show relatively strong agreement."
+            : confidence >= 45
+                ? "Signals show moderate agreement."
+                : "Signals are weak or limited by available data.";
+
+    $("momentum").textContent =
+        momentum.percentage === null
+            ? "—"
+            : momentum.name;
+
+    $("momentum").className =
+        "value " +
+        (
+            momentum.score > 0
+                ? "good"
+                : momentum.score < 0
+                    ? "bad"
+                    : "neutral"
+        );
+
+    $("trend").textContent =
+        trend.name;
+
+    $("trend").className =
+        "value " +
+        (
+            trend.score > 0
+                ? "good"
+                : trend.score < 0
+                    ? "bad"
+                    : "neutral"
+        );
+
+    $("rsi").textContent =
+        rsi === null
+            ? "—"
+            : rsi.toFixed(1);
+
+    $("rsi").className =
+        "value " +
+        (
+            rsi === null
+                ? "neutral"
+                : rsi < 30
+                    ? "good"
+                    : rsi > 70
+                        ? "bad"
+                        : "neutral"
+        );
+
+    $("position52").textContent =
+        position52 === null
+            ? "—"
+            : position52.toFixed(0) + "%";
+
+    $("position52").className =
+        "value " +
+        (
+            position52 === null
+                ? "neutral"
+                : position52 > 70
+                    ? "good"
+                    : position52 < 30
+                        ? "bad"
+                        : "neutral"
+        );
+
+    /* Score */
+
+    const scorePercent =
+        clamp(
+            50 + score * 10,
+            5,
+            95
+        );
+
+    $("scoreFill").style.width =
+        scorePercent + "%";
+
+    $("scoreText").textContent =
+        signal === "BUY"
+            ? "Bullish"
+            : signal === "SELL"
+                ? "Bearish"
+                : "Neutral";
+
+    /* Long term */
+
+    $("longStatus").textContent =
+        longStatus;
+
+    $("longStatus").className =
+        "long-status " + longClass;
+
+    $("longReason").textContent =
+        longReason;
+
+    $("longMeaning").textContent =
+        horizonMeaning(
+            $("horizon").value,
+            longStatus
+        );
+
+    /* Insights */
+
+    $("insights").innerHTML =
+        factors
+            .slice(0, 8)
+            .map(f => `
+                <div class="insight">
+                    <div class="insight-icon">${f.icon}</div>
+                    <div>${escapeHTML(f.text)}</div>
+                </div>
+            `)
+            .join("");
+
+    $("analysisTime").textContent =
+        new Date().toLocaleString("en-IN");
+
+    /* Save */
+
+    const analysis = {
+
+        id: Date.now(),
+
+        name,
+
+        current,
+
+        previous,
+
+        high52,
+
+        low52,
+
+        prices,
+
+        signal,
+
+        score: Number(score.toFixed(2)),
+
+        confidence,
+
+        trend: trend.name,
+
+        momentum: momentum.name,
+
+        momentumPercentage:
+            momentum.percentage,
+
+        rsi,
+
+        position52,
+
+        longStatus,
+
+        longReason,
+
+        imageName:
+            uploadedImageName || null,
+
+        createdAt:
+            new Date().toISOString()
+    };
+
+    if (save) {
+        saveHistory(analysis);
+        renderHistory();
+    }
+
+    showToast(
+        `${name}: ${signal} signal generated`
+    );
+}
+
+/* ================= HORIZON TEXT ================= */
+
+function horizonMeaning(horizon, status) {
+
+    if (horizon === "short") {
+
+        return status === "Favourable"
+            ? "For a short-term view, momentum and trend currently look supportive, but short-term markets can change quickly."
+            : "Short-term trading is highly sensitive to news and market volatility. Use extra caution.";
+
+    }
+
+    if (horizon === "medium") {
+
+        return status === "Favourable"
+            ? "For a medium-term view, the available trend indicators are supportive, although confirmation is still important."
+            : "The medium-term picture is not strong enough for high confidence based only on the available technical data.";
+
+    }
+
+    return status === "Favourable"
+        ? "The available technical indicators are supportive, but a real long-term investment decision should also examine business fundamentals."
+        : "Technical data alone does not provide enough support for a confident long-term investment conclusion.";
+}
+
+/* ================= ESCAPE HTML ================= */
+
+function escapeHTML(value) {
+
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+/* ================= LOCAL STORAGE ================= */
+
+function getHistory() {
+
+    try {
+
+        const raw =
+            localStorage.getItem(STORAGE_KEY);
+
+        if (!raw) return [];
+
+        const parsed =
+            JSON.parse(raw);
+
+        return Array.isArray(parsed)
+            ? parsed
+            : [];
+
+    } catch (error) {
+
+        console.error(error);
+
+        return [];
+    }
+}
+
+function saveHistory(item) {
+
+    const history =
+        getHistory();
+
+    history.unshift(item);
+
+    /*
+       Keep the latest 50 analyses.
+    */
+
+    const trimmed =
+        history.slice(0, 50);
+
+    localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(trimmed)
+    );
+}
+
+/* ================= RENDER HISTORY ================= */
+
+function renderHistory() {
+
+    const history =
+        getHistory();
+
+    $("historyCount").textContent =
+        history.length +
+        (history.length === 1 ? " saved" : " saved");
+
+    if (!history.length) {
+
+        $("historyList").innerHTML = `
+            <div class="empty">
+                No analysis history yet.
+            </div>
+        `;
+
+        return;
+    }
+
+    $("historyList").innerHTML =
+        history
+            .map(item => {
+
+                const date =
+                    new Date(item.createdAt)
+                        .toLocaleString("en-IN");
+
+                const signalClass =
+                    item.signal === "BUY"
+                        ? "good"
+                        : item.signal === "SELL"
+                            ? "bad"
+                            : "neutral";
+
+                return `
+                    <div class="history-item">
+
+                        <div class="history-main">
+
+                            <strong>
+                                ${escapeHTML(item.name)}
+                            </strong>
+
+                            <small>
+                                ${item.current !== null
+                                    ? formatRupee(item.current)
+                                    : "Price unavailable"}
+                                ·
+                                ${date}
+                            </small>
+
+                            <small>
+                                Trend: ${escapeHTML(item.trend)}
+                                ·
+                                RSI:
+                                ${item.rsi !== null
+                                    ? item.rsi.toFixed(1)
+                                    : "—"}
+                            </small>
+
+                        </div>
+
+                        <div class="history-signal ${signalClass}">
+                            ${escapeHTML(item.signal)}
+                        </div>
+
+                    </div>
+                `;
+            })
+            .join("");
+}
+
+/* ================= CLEAR ALL ================= */
+
+function clearAll() {
+
+    const history =
+        getHistory();
+
+    if (!history.length) {
+
+        showToast("There is no saved data to clear.");
+
+        return;
+    }
+
+    const confirmed =
+        confirm(
+            "Are you sure you want to delete ALL saved StockScope analysis history?\n\nThis action cannot be undone."
+        );
+
+    if (!confirmed) return;
+
+    localStorage.removeItem(STORAGE_KEY);
+
+    renderHistory();
+
+    showToast("All saved analysis data has been deleted.");
+}
+
+/* ================= EXPORT ================= */
+
+function exportHistory() {
+
+    const history =
+        getHistory();
+
+    if (!history.length) {
+
+        showToast("No history available to export.");
+
+        return;
+    }
+
+    const blob =
+        new Blob(
+            [
+                JSON.stringify(
+                    history,
+                    null,
+                    2
+                )
+            ],
+            {
+                type: "application/json"
+            }
+        );
+
+    const url =
+        URL.createObjectURL(blob);
+
+    const a =
+        document.createElement("a");
+
+    a.href = url;
+
+    a.download =
+        "stockscope-analysis-history.json";
+
+    document.body.appendChild(a);
+
+    a.click();
+
+    a.remove();
+
+    URL.revokeObjectURL(url);
+
+    showToast("Analysis history exported.");
+}
+
+/* ================= EXAMPLE ================= */
+
+function loadExample() {
+
+    $("stockName").value =
+        "Tata Power";
+
+    $("currentPrice").value =
+        "420";
+
+    $("previousPrice").value =
+        "414";
+
+    $("high52").value =
+        "450";
+
+    $("low52").value =
+        "300";
+
+    $("priceHistory").value =
+        "360, 365, 370, 368, 374, 380, 377, 385, 391, 396, 402, 398, 405, 410, 414, 420";
+
+    showToast(
+        "Example Tata Power-style data loaded."
+    );
+}
+
+/* ================= RESET ================= */
+
+function resetForm() {
+
+    loadedSymbol = "";
+    loadedRows = [];
+    loadedRawJSON = null;
+    $("symbol").value = "";
+    $("dataSummary").textContent = "No data loaded";
+    $("dataTableBody").innerHTML = '<tr><td colspan="8" class="empty">Load a stock to see API data.</td></tr>';
+    setApiStatus("Choose a symbol and click Load.");
+
+    $("stockName").value = "";
+    $("currentPrice").value = "";
+    $("previousPrice").value = "";
+    $("high52").value = "";
+    $("low52").value = "";
+    $("priceHistory").value = "";
+
+    $("preview").src = "";
+    $("preview").style.display = "none";
+
+    $("chartImage").value = "";
+
+    uploadedImageScore = null;
+    uploadedImageName = "";
+
+    $("recommendation").textContent = "HOLD";
+    $("recommendation").className = "rec-value hold";
+
+    $("reason").textContent =
+        "Enter stock information and click “Analyze Stock” to generate an educational analysis.";
+
+    $("confidenceNumber").textContent = "0%";
+    $("confidenceBar").style.width = "0%";
+    $("confidenceText").textContent =
+        "No analysis has been performed yet.";
+
+    $("momentum").textContent = "—";
+    $("trend").textContent = "—";
+    $("rsi").textContent = "—";
+    $("position52").textContent = "—";
+
+    $("scoreFill").style.width = "50%";
+    $("scoreText").textContent = "Neutral";
+
+    $("longStatus").textContent =
+        "Not evaluated";
+
+    $("longStatus").className =
+        "long-status neutral";
+
+    $("longReason").textContent =
+        "Provide price information to evaluate the long-term technical picture.";
+
+    $("analysisTime").textContent =
+        "Waiting for analysis";
+
+    $("insights").innerHTML = `
+        <div class="insight">
+            <div class="insight-icon">ℹ️</div>
+            <div>
+                Enter your data and run an analysis to see the
+                factors behind the recommendation.
+            </div>
+        </div>
+    `;
+
+    showToast("Analysis form reset.");
+}
+
+/* ================= AUTO-SAVE FORM ================= */
+
+function saveFormState() {
+
+    const state = {
+
+        stockName:
+            $("stockName").value,
+
+        currentPrice:
+            $("currentPrice").value,
+
+        previousPrice:
+            $("previousPrice").value,
+
+        high52:
+            $("high52").value,
+
+        low52:
+            $("low52").value,
+
+        horizon:
+            $("horizon").value,
+
+        priceHistory:
+            $("priceHistory").value
+    };
+
+    localStorage.setItem(
+        SETTINGS_KEY,
+        JSON.stringify(state)
+    );
+}
+
+function restoreFormState() {
+
+    try {
+
+        const raw =
+            localStorage.getItem(
+                SETTINGS_KEY
+            );
+
+        if (!raw) return;
+
+        const state =
+            JSON.parse(raw);
+
+        if (state.stockName !== undefined)
+            $("stockName").value = state.stockName;
+
+        if (state.currentPrice !== undefined)
+            $("currentPrice").value = state.currentPrice;
+
+        if (state.previousPrice !== undefined)
+            $("previousPrice").value = state.previousPrice;
+
+        if (state.high52 !== undefined)
+            $("high52").value = state.high52;
+
+        if (state.low52 !== undefined)
+            $("low52").value = state.low52;
+
+        if (state.horizon !== undefined)
+            $("horizon").value = state.horizon;
+
+        if (state.priceHistory !== undefined)
+            $("priceHistory").value = state.priceHistory;
+
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+/* ================= DATA EXPORT ================= */
+
+function exportRows() {
+    if (!loadedRows.length) { showToast("Load a stock before exporting data."); return null; }
+    return loadedRows.slice();
+}
+
+function downloadExcel() {
+    const rows = exportRows();
+    if (!rows) return;
+    if (!window.XLSX) { showToast("Excel library is unavailable. Check your internet connection."); return; }
+
+    const data = [
+        ["Date","Open","High","Low","Close","Adjusted Close","Volume","Dividend Amount"],
+        ...rows.map(r => [r.date,r.open,r.high,r.low,r.close,r.adjustedClose,r.volume,r.dividend])
+    ];
+
+    const worksheet = XLSX.utils.aoa_to_sheet(data);
+    worksheet["!cols"] = [
+        {wch:14},{wch:12},{wch:12},{wch:12},{wch:12},{wch:16},{wch:16},{wch:16}
+    ];
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Adjusted Data");
+    XLSX.writeFile(workbook, `${loadedSymbol || "stock"}_alpha_vantage_data.xlsx`);
+    showToast("Excel file downloaded.");
+}
+
+function downloadPDF() {
+    const rows = exportRows();
+    if (!rows) return;
+    if (!window.jspdf || !window.jspdf.jsPDF) { showToast("PDF library is unavailable. Check your internet connection."); return; }
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({orientation:"landscape", unit:"pt", format:"a4"});
+    doc.setFontSize(18);
+    doc.text(`StockScope — ${loadedSymbol}`, 40, 40);
+    doc.setFontSize(9);
+    doc.text(`Alpha Vantage adjusted time-series data · ${rows.length} records · Exported ${new Date().toLocaleString("en-IN")}`, 40, 57);
+    doc.autoTable({
+        startY: 72,
+        head: [["Date","Open","High","Low","Close","Adjusted Close","Volume","Dividend"]],
+        body: rows.map(r => [r.date,fmt(r.open),fmt(r.high),fmt(r.low),fmt(r.close),fmt(r.adjustedClose),r.volume?.toLocaleString("en-IN") ?? "",fmt(r.dividend,4)]),
+        styles: {fontSize:7, cellPadding:3},
+        headStyles: {fontSize:7}
+    });
+    doc.save(`${loadedSymbol || "stock"}_alpha_vantage_data.pdf`);
+    showToast("PDF downloaded.");
+}
+
+function fmt(v, decimals=2) { return Number.isFinite(v) ? v.toFixed(decimals) : ""; }
+
+/* ================= INITIALIZATION ================= */
+
+[
+    "stockName",
+    "currentPrice",
+    "previousPrice",
+    "high52",
+    "low52",
+    "horizon",
+    "priceHistory"
+].forEach(id => {
+
+    $(id).addEventListener(
+        "input",
+        saveFormState
+    );
+
+    $(id).addEventListener(
+        "change",
+        saveFormState
+    );
+});
+
+
+$("apiKey").value = localStorage.getItem(API_KEY_STORAGE) || "";
+$("apiKey").addEventListener("change", saveApiKey);
+$("symbol").addEventListener("input", () => { loadedSymbol = ""; });
+document.querySelectorAll(".chip").forEach(chip => {
+    chip.addEventListener("click", () => {
+        $("symbol").value = chip.dataset.symbol;
+        // Chips only fill the box. They never call the API.
+        setApiStatus("Symbol selected. Click Load when you are ready.");
+    });
+});
+
+restoreFormState();
+renderHistory();
+
+</script>
+
+<script>
+function applyTheme(t) {
+    document.documentElement.setAttribute("data-theme", t);
+    var m = document.getElementById("metaTheme");
+    if (m) m.setAttribute("content", t === "light" ? "#fbf6f0" : "#0e0b0a");
+    var i = document.getElementById("themeIcon"), l = document.getElementById("themeLabel");
+    if (i) i.textContent = t === "light" ? "🌙" : "☀️";
+    if (l) l.textContent = t === "light" ? "Dark" : "Light";
+}
+function toggleTheme() {
+    var next = document.documentElement.getAttribute("data-theme") === "light" ? "dark" : "light";
+    applyTheme(next);
+    try { localStorage.setItem("mis_theme", next); } catch(e) {}
+}
+applyTheme(document.documentElement.getAttribute("data-theme") || "dark");
+</script>
+</body>
+</html>
